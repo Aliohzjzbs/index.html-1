@@ -141,47 +141,50 @@
       status.className = "";
       contactBtn.style.display = "none";
 
-      db.ref("gvjf").once("value", (snapshot) => {
-        let found = false;
-        snapshot.forEach((child) => {
-          const data = child.val();
-          const key = child.key;
+db.ref("gvjf").once("value", (snapshot) => {
+  let found = false;
+  snapshot.forEach((child) => {
+    const data = child.val();
+    const key = child.key;
 
-          if (data.code === code) {
-            found = true;
-            const now = Date.now();
+    if (data.code === code) {
+      found = true;
+      const now = Date.now();
 
-            if (data.expire <= now) {
-              status.textContent = "⛔ الكود منتهي الصلاحية.";
-              status.className = "error";
-            } else if (data.deviceId && data.deviceId !== deviceId) {
-              status.textContent = "⚠️ هذا الكود مفعل على جهاز آخر.";
-              status.className = "error";
-            } else if (data.status !== "approved") {
-              status.textContent = "⏳ الكود لم يتم قبوله من الأدمن بعد.";
-              status.className = "error";
-            } else {
-              status.textContent = "✅ تم قبولك من الأدمن! جاري الدخول...";
-              status.className = "success";
-              db.ref("gvjf/" + key).update({ deviceId: deviceId });
-              localStorage.setItem("savedCode", code);
+      if (data.expire <= now) {
+        status.textContent = "⛔ الكود منتهي الصلاحية.";
+        status.className = "error";
 
-              if (window.Android && Android.openXcv) {
-                Android.openXcv();
-              } else {
-                alert("تم الدخول (تجربة ويب). افتح التطبيق لتنتقل للأكتيفيتي.");
-              }
-            }
-          }
-        });
+      } else if (data.deviceId && data.deviceId !== deviceId) {
+        status.textContent = "⚠️ هذا الكود مفعل على جهاز آخر.";
+        status.className = "error";
 
-        if (!found) {
-          status.textContent = "❌ الكود غير صحيح.";
-          status.className = "error";
-          contactBtn.style.display = "flex";
-        }
-      });
+      } else if (data.status !== "approved") {
+        status.textContent = "⏳ الكود لم يتم قبوله من الأدمن بعد.";
+        status.className = "error";
+
+      } else {
+        status.textContent = "✅ تم قبولك من الأدمن! جاري الدخول...";
+        status.className = "success";
+
+        db.ref("gvjf/" + key).update({ deviceId: deviceId });
+        localStorage.setItem("savedCode", code);
+
+        // 🚀 تحويل لصفحة أخرى
+        setTimeout(() => {
+          window.location.href = "home.html";
+        }, 1500);
+      }
     }
+  });
+
+  if (!found) {
+    status.textContent = "❌ الكود غير صحيح.";
+    status.className = "error";
+    contactBtn.style.display = "flex";
+  }
+});
+
 
     function autoLogin(savedCode) {
       db.ref("gvjf").once("value", (snapshot) => {
